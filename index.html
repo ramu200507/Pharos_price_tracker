@@ -45,9 +45,20 @@ let html = "";
 
 data.tickers.slice(0,15).forEach(t => {
 
+const links = {
+ "Bitget":"https://www.bitget.com",
+ "MEXC":"https://www.mexc.com",
+ "Gate.io":"https://www.gate.io",
+ "KuCoin":"https://www.kucoin.com",
+ "Bybit":"https://www.bybit.com",
+ "OKX":"https://www.okx.com"
+};
+
+const exchangeLink = links[t.market.name] || "#";
+
 html += `
 <div class="card">
-<a href="#" target="_blank">
+<a href="${exchangeLink}" target="_blank">
 ${t.market.name}
 </a>
 <br>
