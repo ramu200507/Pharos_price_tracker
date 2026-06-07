@@ -40,7 +40,10 @@ const res = await fetch(
 );
 
 const data = await res.json();
+const prices = data.tickers.slice(0,15).map(t => Number(t.last));
 
+const lowestPrice = Math.min(...prices);
+const highestPrice = Math.max(...prices);
 let html = "";
 
 data.tickers.slice(0,15).forEach(t => {
@@ -57,16 +60,23 @@ const links = {
 const exchangeLink = links[t.market.name] || "#";
 
 html += `
+let badge = "";
+
+if (Number(t.last) === lowestPrice) {
+  badge = " 🟢 Lowest";
+} else if (Number(t.last) === highestPrice) {
+  badge = " 🔴 Highest";
+}
+
+html += `
 <div class="card">
 <a href="${exchangeLink}" target="_blank">
 ${t.market.name}
 </a>
 <br>
-Price: $${t.last}
+Price: $${t.last}${badge}
 </div>
 `;
-
-});
 
 document.getElementById("prices").innerHTML = html;
 
