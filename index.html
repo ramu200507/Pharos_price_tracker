@@ -5,7 +5,6 @@
 <title>🚀 Pharos Price Tracker</title>
 
 <style>
-
 body{
 background:#0d1117;
 color:white;
@@ -16,14 +15,14 @@ margin:0;
 
 h1{
 text-align:center;
+margin-bottom:20px;
 }
 
 .banner{
-background:linear-gradient(135deg,#1f6feb,#238636);
+background:linear-gradient(135deg,#238636,#1f6feb);
 padding:15px;
 border-radius:15px;
 margin-bottom:15px;
-font-size:16px;
 line-height:1.8;
 }
 
@@ -47,21 +46,21 @@ margin-bottom:10px;
 border-radius:12px;
 }
 
-.logo{
-width:24px;
-height:24px;
-vertical-align:middle;
-margin-right:8px;
-border-radius:50%;
-background:white;
-}
-
 a{
 color:#58a6ff;
 text-decoration:none;
 font-weight:bold;
 }
 
+.green{
+color:#00ff88;
+font-weight:bold;
+}
+
+.red{
+color:#ff5555;
+font-weight:bold;
+}
 </style>
 </head>
 
@@ -83,23 +82,25 @@ const res = await fetch(
 
 const data = await res.json();
 
+/* USDT pairs only */
 const tickers = data.tickers
-.slice(0,15)
-.sort((a,b)=>a.last-b.last);
+.filter(t => t.target === "USDT")
+.sort((a,b) => Number(a.last) - Number(b.last))
+.slice(0,15);
 
-const prices = tickers.map(t=>Number(t.last));
+const prices = tickers.map(t => Number(t.last));
 
 const lowestPrice = Math.min(...prices);
 const highestPrice = Math.max(...prices);
 
 const lowestExchange =
-tickers.find(t=>Number(t.last)===lowestPrice)?.market.name || "N/A";
+tickers.find(t => Number(t.last) === lowestPrice)?.market.name || "N/A";
 
 const highestExchange =
-tickers.find(t=>Number(t.last)===highestPrice)?.market.name || "N/A";
+tickers.find(t => Number(t.last) === highestPrice)?.market.name || "N/A";
 
 const differencePercent =
-(((highestPrice-lowestPrice)/lowestPrice)*100)
+(((highestPrice - lowestPrice) / lowestPrice) * 100)
 .toFixed(2);
 
 const now = new Date().toLocaleTimeString();
@@ -110,16 +111,8 @@ const links = {
 "Gate.io":"https://www.gate.io",
 "KuCoin":"https://www.kucoin.com",
 "Bybit":"https://www.bybit.com",
-"OKX":"https://www.okx.com"
-};
-
-const logos = {
-"Bitget":"https://cryptologos.cc/logos/bitget-token-bgb-logo.png",
-"MEXC":"https://cryptologos.cc/logos/mexc-token-mx-logo.png",
-"Gate.io":"https://cryptologos.cc/logos/gatechain-token-gt-logo.png",
-"KuCoin":"https://cryptologos.cc/logos/kucoin-token-kcs-logo.png",
-"Bybit":"https://seeklogo.com/images/B/bybit-logo-vector-logo.png",
-"OKX":"https://seeklogo.com/images/O/okx-logo-black-and-white.png"
+"OKX":"https://www.okx.com",
+"Upbit":"https://www.upbit.com"
 };
 
 let html = `
@@ -144,42 +137,26 @@ Last Updated: ${now}
 
 `;
 
-tickers.forEach(t=>{
+tickers.forEach(t => {
 
-let badge="";
+let badge = "";
 
-if(Number(t.last)===lowestPrice){
-badge=" 🟢 Lowest";
+if(Number(t.last) === lowestPrice){
+badge = ' <span class="green">🟢 Lowest</span>';
 }
-else if(Number(t.last)===highestPrice){
-badge=" 🔴 Highest";
+else if(Number(t.last) === highestPrice){
+badge = ' <span class="red">🔴 Highest</span>';
 }
 
-const exchangeLink =
-links[t.market.name] || "#";
-
-const logo =
-logos[t.market.name] || "";
+const exchangeLink = links[t.market.name] || "#";
 
 html += `
 <div class="card">
-
 <a href="${exchangeLink}" target="_blank">
-
-<img
-class="logo"
-src="${logo}"
-alt=""
->
-
 ${t.market.name}
-
 </a>
-
 <br><br>
-
-Price: $${t.last}${badge}
-
+Price: $${Number(t.last).toFixed(6)}${badge}
 </div>
 `;
 
@@ -192,14 +169,13 @@ document.getElementById("prices").innerHTML = html;
 document.getElementById("prices").innerHTML =
 "Failed to load prices";
 
-console.log(error);
+console.error(error);
 
 }
 
 }
 
 loadPrices();
-
 setInterval(loadPrices,30000);
 
 </script>
