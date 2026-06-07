@@ -38,7 +38,19 @@ canvas{background:rgba(255,255,255,.04);border-radius:18px;padding:10px}
     <img src="Pharos_logo.png" alt="Pharos Logo" class="header-logo">
     <h1>Pharos Price Tracker</h1>
 </div>
+.header{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:12px;
+margin-bottom:20px;
+}
 
+.header h1{
+margin:0;
+font-size:32px;
+line-height:1;
+}
 <div id="stats" class="grid"></div><br>
 <div class="card"><canvas id="chart"></canvas></div><br>
 <div id="prices"></div>
