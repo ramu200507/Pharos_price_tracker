@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,21 +7,23 @@
 
 <style>
 body{
-background:#111;
-color:white;
-font-family:Arial;
-padding:20px;
+  background:#111;
+  color:white;
+  font-family:Arial;
+  padding:20px;
 }
+
 .card{
-background:#222;
-padding:12px;
-margin:10px 0;
-border-radius:10px;
+  background:#222;
+  padding:12px;
+  margin:10px 0;
+  border-radius:10px;
 }
+
 a{
-color:#00ff99;
-text-decoration:none;
-font-weight:bold;
+  color:#00ff99;
+  text-decoration:none;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -35,56 +38,72 @@ font-weight:bold;
 
 async function loadPrices(){
 
-const res = await fetch(
-"https://api.coingecko.com/api/v3/coins/pharos-network/tickers"
-);
+  try {
 
-const data = await res.json();
-const prices = data.tickers.slice(0,15).map(t => Number(t.last));
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/coins/pharos-network/tickers"
+    );
 
-const lowestPrice = Math.min(...prices);
-const highestPrice = Math.max(...prices);
-let html = "";
+    const data = await res.json();
 
-data.tickers.slice(0,15).forEach(t => {
+    const prices = data.tickers
+      .slice(0,15)
+      .map(t => Number(t.last));
 
-let badge = "";
+    const lowestPrice = Math.min(...prices);
+    const highestPrice = Math.max(...prices);
 
-if (Number(t.last) === lowestPrice) {
-  badge = " 🟢 Lowest";
-} else if (Number(t.last) === highestPrice) {
-  badge = " 🔴 Highest";
+    let html = "";
+
+    data.tickers.slice(0,15).forEach(t => {
+
+      let badge = "";
+
+      if(Number(t.last) === lowestPrice){
+        badge = " 🟢 Lowest";
+      }
+      else if(Number(t.last) === highestPrice){
+        badge = " 🔴 Highest";
+      }
+
+      const links = {
+        "Bitget":"https://www.bitget.com",
+        "MEXC":"https://www.mexc.com",
+        "Gate.io":"https://www.gate.io",
+        "KuCoin":"https://www.kucoin.com",
+        "Bybit":"https://www.bybit.com",
+        "OKX":"https://www.okx.com"
+      };
+
+      const exchangeLink =
+        links[t.market.name] || "#";
+
+      html += `
+      <div class="card">
+        <a href="${exchangeLink}" target="_blank">
+          ${t.market.name}
+        </a>
+        <br>
+        Price: $${t.last}${badge}
+      </div>
+      `;
+    });
+
+    document.getElementById("prices").innerHTML = html;
+
+  } catch(error) {
+    document.getElementById("prices").innerHTML =
+      "Failed to load prices";
+    console.log(error);
+  }
 }
 
-const links = {
- "Bitget":"https://www.bitget.com",
- "MEXC":"https://www.mexc.com",
- "Gate.io":"https://www.gate.io",
- "KuCoin":"https://www.kucoin.com",
- "Bybit":"https://www.bybit.com",
- "OKX":"https://www.okx.com"
-};
-
-const exchangeLink = links[t.market.name] || "#";
-
-html += `
-<div class="card">
-<a href="${exchangeLink}" target="_blank">
-${t.market.name}
-</a>
-<br>
-Price: $${t.last}${badge}
-</div>
-`;
-
-});
-
-document.getElementById("prices").innerHTML = html;
-
 loadPrices();
+
+/* Auto Refresh Every 30 Seconds */
+setInterval(loadPrices, 30000);
 
 </script>
 
 </body>
-
 </html>
