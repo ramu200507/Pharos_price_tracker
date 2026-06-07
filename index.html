@@ -3,91 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pharos Price Tracker Pro</title>
+<title>🚀 Pharos Price Tracker Ultimate</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
+*{margin:0;padding:0;box-sizing:border-box}
 body{
-margin:0;color:#fff;font-family:Arial,sans-serif;
-background:linear-gradient(rgba(5,10,20,.85),rgba(5,10,20,.95));
+font-family:Segoe UI,sans-serif;
+color:#fff;
+background:linear-gradient(rgba(0,10,30,.8),rgba(0,0,0,.95)),
+url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1600');
+background-size:cover;background-attachment:fixed;
 min-height:100vh;
 }
-body:before{
-content:"";position:fixed;inset:0;pointer-events:none;
-background:
-radial-gradient(circle at 20% 20%,rgba(0,140,255,.25),transparent 30%),
-radial-gradient(circle at 80% 30%,rgba(0,255,255,.15),transparent 30%);
-}
 .container{max-width:1200px;margin:auto;padding:20px}
-h1{text-align:center;text-shadow:0 0 20px #39f}
+h1{text-align:center;font-size:3rem;margin-bottom:20px;
+background:linear-gradient(90deg,#00e5ff,#58a6ff,#00ff88);
+-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
 .card{
 background:rgba(255,255,255,.06);
-backdrop-filter:blur(12px);
-border-radius:16px;padding:16px;
+backdrop-filter:blur(16px);
+border-radius:18px;padding:16px;
 border:1px solid rgba(255,255,255,.08);
+margin-bottom:12px;
 }
-.exchange{display:flex;align-items:center;gap:10px}
-.exchange img{width:40px;height:40px;border-radius:50%;background:#fff}
-canvas{background:rgba(255,255,255,.04);border-radius:16px;padding:10px}
+.exchange{display:flex;align-items:center;gap:12px}
+.exchange img{width:48px;height:48px;border-radius:50%;background:#fff}
+a{text-decoration:none;color:#fff}
+canvas{background:rgba(255,255,255,.04);border-radius:18px;padding:10px}
+#ticker{position:fixed;bottom:0;left:0;width:100%;padding:10px;background:#001d3d;text-align:center}
 </style>
 </head>
 <body>
 <div class="container">
-<h1>🚀 Pharos Price Tracker Pro</h1>
-<div id="stats" class="grid"></div>
-<br>
-<div class="card"><canvas id="chart"></canvas></div>
-<br>
+<h1>🚀 Pharos Price Tracker Ultimate</h1>
+<div id="stats" class="grid"></div><br>
+<div class="card"><canvas id="chart"></canvas></div><br>
 <div id="prices"></div>
 </div>
+<div id="ticker">PHRS LIVE • AUTO REFRESH 30s • ARBITRAGE SCANNER</div>
 
 <script>
-const logos={
-"KuCoin":"https://cryptologos.cc/logos/kucoin-token-kcs-logo.png",
-"BitMart":"https://cryptologos.cc/logos/bitmart-bmx-logo.png",
-"MEXC":"https://cryptologos.cc/logos/mexc-token-mx-logo.png"
+const exchangeInfo={
+"KuCoin":{logo:"https://assets.coingecko.com/markets/images/61/small/kucoin.png",trade:"https://www.kucoin.com/trade/PHRS-USDT"},
+"BitMart":{logo:"https://assets.coingecko.com/markets/images/239/small/bitmart.png",trade:"https://www.bitmart.com/trade/en-US?symbol=PHRS_USDT"},
+"LBank":{logo:"https://assets.coingecko.com/markets/images/118/small/lbank.png",trade:"https://www.lbank.com/trade/phrs_usdt"},
+"Hibt":{logo:"https://assets.coingecko.com/markets/images/1704/small/hibt.png",trade:"https://www.hibt.com/trade/PHRS_USDT"},
+"MEXC":{logo:"https://assets.coingecko.com/markets/images/409/small/mexc.png",trade:"https://www.mexc.com/exchange/PHRS_USDT"},
+"Gate.io":{logo:"https://assets.coingecko.com/markets/images/60/small/gateio.png",trade:"https://www.gate.io/trade/PHRS_USDT"},
+"Bitget":{logo:"https://assets.coingecko.com/markets/images/540/small/bitget.png",trade:"https://www.bitget.com/spot/PHRSUSDT"},
+"Bybit":{logo:"https://assets.coingecko.com/markets/images/698/small/bybit_spot.png",trade:"https://www.bybit.com/trade/spot/PHRS/USDT"},
+"OKX":{logo:"https://assets.coingecko.com/markets/images/96/small/okx.png",trade:"https://www.okx.com/trade-spot/phrs-usdt"}
 };
 
-let chart;
-let history=[];
+let chart,history=[];
 
 async function loadPrices(){
 try{
-const r=await fetch("https://api.coingecko.com/api/v3/coins/pharos-network/tickers");
-const d=await r.json();
+const res=await fetch("https://api.coingecko.com/api/v3/coins/pharos-network/tickers");
+const data=await res.json();
 
-const tickers=d.tickers.filter(t=>t.target==="USDT").sort((a,b)=>a.last-b.last);
-const low=tickers[0];
-const high=tickers[tickers.length-1];
+const tickers=data.tickers.filter(t=>t.target==="USDT").sort((a,b)=>a.last-b.last);
+if(!tickers.length) throw new Error();
+
+const low=tickers[0], high=tickers[tickers.length-1];
 const diff=(((high.last-low.last)/low.last)*100).toFixed(2);
+const avg=tickers.reduce((s,t)=>s+Number(t.last),0)/tickers.length;
 
 document.getElementById("stats").innerHTML=`
-<div class="card">🟢 Best Buy<br><b>${low.market.name}</b><br>$${low.last}</div>
-<div class="card">🔴 Best Sell<br><b>${high.market.name}</b><br>$${high.last}</div>
+<div class="card">🟢 Best Buy<br><b>${low.market.name}</b><br>$${Number(low.last).toFixed(6)}</div>
+<div class="card">🔴 Best Sell<br><b>${high.market.name}</b><br>$${Number(high.last).toFixed(6)}</div>
 <div class="card">💰 Arbitrage<br><b>${diff}%</b></div>
-<div class="card">🕒 Updated<br><b>${new Date().toLocaleTimeString()}</b></div>`;
+<div class="card">📊 Average<br><b>$${avg.toFixed(6)}</b></div>`;
 
-const avg=tickers.reduce((s,t)=>s+Number(t.last),0)/tickers.length;
-history.push(avg);
-if(history.length>20) history.shift();
+history.push(avg); if(history.length>25) history.shift();
 
 const ctx=document.getElementById("chart");
 if(chart) chart.destroy();
-chart=new Chart(ctx,{
-type:"line",
+chart=new Chart(ctx,{type:"line",
 data:{labels:history.map((_,i)=>i+1),
-datasets:[{label:"Average Price",data:history}]}
+datasets:[{label:"PHRS Avg Price",data:history,borderColor:"#00e5ff",fill:true}]},
+options:{plugins:{legend:{labels:{color:"white"}}},
+scales:{x:{ticks:{color:"white"}},y:{ticks:{color:"white"}}}}
 });
 
-document.getElementById("prices").innerHTML=tickers.map(t=>`
+document.getElementById("prices").innerHTML=tickers.map((t,i)=>{
+const info=exchangeInfo[t.market.name]||{};
+return `<a href="${info.trade||'#'}" target="_blank">
 <div class="card">
 <div class="exchange">
-<img src="${logos[t.market.name]||'https://cdn-icons-png.flaticon.com/512/6001/6001527.png'}">
-<div><b>${t.market.name}</b><br>$${Number(t.last).toFixed(6)}</div>
+<img src="${info.logo||'https://cdn-icons-png.flaticon.com/512/6001/6001527.png'}">
+<div><b>#${i+1} ${t.market.name}</b><br>$${Number(t.last).toFixed(6)}<br>Click to Trade PHRS/USDT</div>
 </div>
-</div><br>`).join("");
+</div></a>`;
+}).join("");
 }catch(e){
-document.getElementById("prices").innerHTML="Failed to load data";
+document.getElementById("prices").innerHTML="Failed to load prices.";
 }
 }
 loadPrices();
