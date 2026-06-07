@@ -16,10 +16,7 @@ background-size:cover;background-attachment:fixed;
 min-height:100vh;
 }
 .container{max-width:1200px;margin:auto;padding:20px}
-h1{ <div class="header">
-    <img src="Pharos_logo.png" alt="Pharos Logo" class="header-logo">
-    <h1>Pharos Price Tracker</h1>
-</div>}
+h1{}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
 .card{
 background:rgba(255,255,255,.06);
@@ -37,6 +34,10 @@ canvas{background:rgba(255,255,255,.04);border-radius:18px;padding:10px}
 </head>
 <body>
 <div class="container">
+     <div class="header">
+    <img src="Pharos_logo.png" alt="Pharos Logo" class="header-logo">
+    <h1>Pharos Price Tracker</h1>
+</div>
 <h1>🚀 Pharos Price Tracker Ultimate</h1>
 <div id="stats" class="grid"></div><br>
 <div class="card"><canvas id="chart"></canvas></div><br>
