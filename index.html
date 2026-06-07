@@ -2,50 +2,66 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pharos Price Tracker</title>
+<title>🚀 Pharos Price Tracker</title>
 
 <style>
+
 body{
-  background:#0d1117;
-  color:white;
-  font-family:Arial,sans-serif;
-  padding:20px;
+background:#0d1117;
+color:white;
+font-family:Arial,sans-serif;
+padding:20px;
+margin:0;
 }
 
 h1{
-  text-align:center;
+text-align:center;
+}
+
+.banner{
+background:linear-gradient(135deg,#1f6feb,#238636);
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+font-size:16px;
+line-height:1.8;
 }
 
 .summary{
-  background:#161b22;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-}
-
-.card{
-  background:#161b22;
-  padding:15px;
-  margin:10px 0;
-  border-radius:12px;
-  transition:0.3s;
-}
-
-.card:hover{
-  transform:scale(1.02);
-}
-
-a{
-  color:#58a6ff;
-  text-decoration:none;
-  font-weight:bold;
+background:#161b22;
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
 }
 
 .updated{
-  text-align:center;
-  color:#aaa;
-  margin-bottom:15px;
+text-align:center;
+color:#aaa;
+margin-bottom:15px;
 }
+
+.card{
+background:#161b22;
+padding:15px;
+margin-bottom:10px;
+border-radius:12px;
+}
+
+.logo{
+width:24px;
+height:24px;
+vertical-align:middle;
+margin-right:8px;
+border-radius:50%;
+background:white;
+}
+
+a{
+color:#58a6ff;
+text-decoration:none;
+font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -76,25 +92,17 @@ const prices = tickers.map(t=>Number(t.last));
 const lowestPrice = Math.min(...prices);
 const highestPrice = Math.max(...prices);
 
+const lowestExchange =
+tickers.find(t=>Number(t.last)===lowestPrice)?.market.name || "N/A";
+
+const highestExchange =
+tickers.find(t=>Number(t.last)===highestPrice)?.market.name || "N/A";
+
 const differencePercent =
 (((highestPrice-lowestPrice)/lowestPrice)*100)
 .toFixed(2);
 
 const now = new Date().toLocaleTimeString();
-
-let html = `
-<div class="summary">
-<b>📊 Arbitrage Summary</b><br><br>
-
-🟢 Lowest Price: $${lowestPrice}<br>
-🔴 Highest Price: $${highestPrice}<br>
-📈 Difference: ${differencePercent}%<br>
-</div>
-
-<div class="updated">
-Last Updated: ${now}
-</div>
-`;
 
 const links = {
 "Bitget":"https://www.bitget.com",
@@ -104,6 +112,37 @@ const links = {
 "Bybit":"https://www.bybit.com",
 "OKX":"https://www.okx.com"
 };
+
+const logos = {
+"Bitget":"https://cryptologos.cc/logos/bitget-token-bgb-logo.png",
+"MEXC":"https://cryptologos.cc/logos/mexc-token-mx-logo.png",
+"Gate.io":"https://cryptologos.cc/logos/gatechain-token-gt-logo.png",
+"KuCoin":"https://cryptologos.cc/logos/kucoin-token-kcs-logo.png",
+"Bybit":"https://seeklogo.com/images/B/bybit-logo-vector-logo.png",
+"OKX":"https://seeklogo.com/images/O/okx-logo-black-and-white.png"
+};
+
+let html = `
+
+<div class="banner">
+🚀 <b>Best Buy:</b> ${lowestExchange} ($${lowestPrice})<br>
+🔥 <b>Best Sell:</b> ${highestExchange} ($${highestPrice})<br>
+💰 <b>Arbitrage Opportunity:</b> ${differencePercent}%
+</div>
+
+<div class="summary">
+📊 <b>Market Summary</b><br><br>
+
+🟢 Lowest Price: $${lowestPrice}<br>
+🔴 Highest Price: $${highestPrice}<br>
+📈 Difference: ${differencePercent}%
+</div>
+
+<div class="updated">
+Last Updated: ${now}
+</div>
+
+`;
 
 tickers.forEach(t=>{
 
@@ -119,14 +158,28 @@ badge=" 🔴 Highest";
 const exchangeLink =
 links[t.market.name] || "#";
 
+const logo =
+logos[t.market.name] || "";
+
 html += `
 <div class="card">
+
 <a href="${exchangeLink}" target="_blank">
+
+<img
+class="logo"
+src="${logo}"
+alt=""
+>
+
 ${t.market.name}
+
 </a>
+
 <br><br>
 
 Price: $${t.last}${badge}
+
 </div>
 `;
 
