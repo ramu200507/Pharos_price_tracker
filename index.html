@@ -48,6 +48,14 @@ let html = "";
 
 data.tickers.slice(0,15).forEach(t => {
 
+let badge = "";
+
+if (Number(t.last) === lowestPrice) {
+  badge = " 🟢 Lowest";
+} else if (Number(t.last) === highestPrice) {
+  badge = " 🔴 Highest";
+}
+
 const links = {
  "Bitget":"https://www.bitget.com",
  "MEXC":"https://www.mexc.com",
@@ -60,15 +68,6 @@ const links = {
 const exchangeLink = links[t.market.name] || "#";
 
 html += `
-let badge = "";
-
-if (Number(t.last) === lowestPrice) {
-  badge = " 🟢 Lowest";
-} else if (Number(t.last) === highestPrice) {
-  badge = " 🔴 Highest";
-}
-
-html += `
 <div class="card">
 <a href="${exchangeLink}" target="_blank">
 ${t.market.name}
@@ -78,9 +77,9 @@ Price: $${t.last}${badge}
 </div>
 `;
 
-document.getElementById("prices").innerHTML = html;
+});
 
-}
+document.getElementById("prices").innerHTML = html;
 
 loadPrices();
 
