@@ -3,36 +3,68 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pharos Price Tracker</title>
+
 <style>
 body{
-font-family:Arial;
-padding:20px;
 background:#111;
 color:white;
+font-family:Arial;
+padding:20px;
 }
 .card{
 background:#222;
-padding:15px;
+padding:12px;
 margin:10px 0;
 border-radius:10px;
 }
 a{
 color:#00ff99;
 text-decoration:none;
+font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
-<h1>Pharos Price Tracker</h1>
+<h1>🚀 Pharos Price Tracker</h1>
 
+<div id="prices">Loading prices...</div>
+
+<script>
+
+async function loadPrices(){
+
+const res = await fetch(
+"https://api.coingecko.com/api/v3/coins/pharos-network/tickers"
+);
+
+const data = await res.json();
+
+let html = "";
+
+data.tickers.slice(0,15).forEach(t => {
+
+html += `
 <div class="card">
-<a href="https://app.pharosnetwork.xyz" target="_blank">
-Pharos Official Website
+<a href="#" target="_blank">
+${t.market.name}
 </a>
+<br>
+Price: $${t.last}
 </div>
+`;
 
-<p>Live exchange prices coming soon...</p>
+});
+
+document.getElementById("prices").innerHTML = html;
+
+}
+
+loadPrices();
+
+</script>
 
 </body>
+</html></body>
 </html>
