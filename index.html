@@ -1,184 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🚀 Pharos Price Tracker</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pharos Price Tracker Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body{
-background:#0d1117;
-color:white;
-font-family:Arial,sans-serif;
-padding:20px;
-margin:0;
+margin:0;color:#fff;font-family:Arial,sans-serif;
+background:linear-gradient(rgba(5,10,20,.85),rgba(5,10,20,.95));
+min-height:100vh;
 }
-
-h1{
-text-align:center;
-margin-bottom:20px;
+body:before{
+content:"";position:fixed;inset:0;pointer-events:none;
+background:
+radial-gradient(circle at 20% 20%,rgba(0,140,255,.25),transparent 30%),
+radial-gradient(circle at 80% 30%,rgba(0,255,255,.15),transparent 30%);
 }
-
-.banner{
-background:linear-gradient(135deg,#238636,#1f6feb);
-padding:15px;
-border-radius:15px;
-margin-bottom:15px;
-line-height:1.8;
-}
-
-.summary{
-background:#161b22;
-padding:15px;
-border-radius:15px;
-margin-bottom:15px;
-}
-
-.updated{
-text-align:center;
-color:#aaa;
-margin-bottom:15px;
-}
-
+.container{max-width:1200px;margin:auto;padding:20px}
+h1{text-align:center;text-shadow:0 0 20px #39f}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
 .card{
-background:#161b22;
-padding:15px;
-margin-bottom:10px;
-border-radius:12px;
+background:rgba(255,255,255,.06);
+backdrop-filter:blur(12px);
+border-radius:16px;padding:16px;
+border:1px solid rgba(255,255,255,.08);
 }
-
-a{
-color:#58a6ff;
-text-decoration:none;
-font-weight:bold;
-}
-
-.green{
-color:#00ff88;
-font-weight:bold;
-}
-
-.red{
-color:#ff5555;
-font-weight:bold;
-}
+.exchange{display:flex;align-items:center;gap:10px}
+.exchange img{width:40px;height:40px;border-radius:50%;background:#fff}
+canvas{background:rgba(255,255,255,.04);border-radius:16px;padding:10px}
 </style>
 </head>
-
 <body>
-
-<h1>🚀 Pharos Price Tracker</h1>
-
-<div id="prices">Loading prices...</div>
+<div class="container">
+<h1>🚀 Pharos Price Tracker Pro</h1>
+<div id="stats" class="grid"></div>
+<br>
+<div class="card"><canvas id="chart"></canvas></div>
+<br>
+<div id="prices"></div>
+</div>
 
 <script>
-
-async function loadPrices(){
-
-try{
-
-const res = await fetch(
-"https://api.coingecko.com/api/v3/coins/pharos-network/tickers"
-);
-
-const data = await res.json();
-
-/* USDT pairs only */
-const tickers = data.tickers
-.filter(t => t.target === "USDT")
-.sort((a,b) => Number(a.last) - Number(b.last))
-.slice(0,15);
-
-const prices = tickers.map(t => Number(t.last));
-
-const lowestPrice = Math.min(...prices);
-const highestPrice = Math.max(...prices);
-
-const lowestExchange =
-tickers.find(t => Number(t.last) === lowestPrice)?.market.name || "N/A";
-
-const highestExchange =
-tickers.find(t => Number(t.last) === highestPrice)?.market.name || "N/A";
-
-const differencePercent =
-(((highestPrice - lowestPrice) / lowestPrice) * 100)
-.toFixed(2);
-
-const now = new Date().toLocaleTimeString();
-
-const links = {
-"Bitget":"https://www.bitget.com",
-"MEXC":"https://www.mexc.com",
-"Gate.io":"https://www.gate.io",
-"KuCoin":"https://www.kucoin.com",
-"Bybit":"https://www.bybit.com",
-"OKX":"https://www.okx.com",
-"Upbit":"https://www.upbit.com"
+const logos={
+"KuCoin":"https://cryptologos.cc/logos/kucoin-token-kcs-logo.png",
+"BitMart":"https://cryptologos.cc/logos/bitmart-bmx-logo.png",
+"MEXC":"https://cryptologos.cc/logos/mexc-token-mx-logo.png"
 };
 
-let html = `
+let chart;
+let history=[];
 
-<div class="banner">
-🚀 <b>Best Buy:</b> ${lowestExchange} ($${lowestPrice})<br>
-🔥 <b>Best Sell:</b> ${highestExchange} ($${highestPrice})<br>
-💰 <b>Arbitrage Opportunity:</b> ${differencePercent}%
-</div>
+async function loadPrices(){
+try{
+const r=await fetch("https://api.coingecko.com/api/v3/coins/pharos-network/tickers");
+const d=await r.json();
 
-<div class="summary">
-📊 <b>Market Summary</b><br><br>
+const tickers=d.tickers.filter(t=>t.target==="USDT").sort((a,b)=>a.last-b.last);
+const low=tickers[0];
+const high=tickers[tickers.length-1];
+const diff=(((high.last-low.last)/low.last)*100).toFixed(2);
 
-🟢 Lowest Price: $${lowestPrice}<br>
-🔴 Highest Price: $${highestPrice}<br>
-📈 Difference: ${differencePercent}%
-</div>
+document.getElementById("stats").innerHTML=`
+<div class="card">🟢 Best Buy<br><b>${low.market.name}</b><br>$${low.last}</div>
+<div class="card">🔴 Best Sell<br><b>${high.market.name}</b><br>$${high.last}</div>
+<div class="card">💰 Arbitrage<br><b>${diff}%</b></div>
+<div class="card">🕒 Updated<br><b>${new Date().toLocaleTimeString()}</b></div>`;
 
-<div class="updated">
-Last Updated: ${now}
-</div>
+const avg=tickers.reduce((s,t)=>s+Number(t.last),0)/tickers.length;
+history.push(avg);
+if(history.length>20) history.shift();
 
-`;
-
-tickers.forEach(t => {
-
-let badge = "";
-
-if(Number(t.last) === lowestPrice){
-badge = ' <span class="green">🟢 Lowest</span>';
-}
-else if(Number(t.last) === highestPrice){
-badge = ' <span class="red">🔴 Highest</span>';
-}
-
-const exchangeLink = links[t.market.name] || "#";
-
-html += `
-<div class="card">
-<a href="${exchangeLink}" target="_blank">
-${t.market.name}
-</a>
-<br><br>
-Price: $${Number(t.last).toFixed(6)}${badge}
-</div>
-`;
-
+const ctx=document.getElementById("chart");
+if(chart) chart.destroy();
+chart=new Chart(ctx,{
+type:"line",
+data:{labels:history.map((_,i)=>i+1),
+datasets:[{label:"Average Price",data:history}]}
 });
 
-document.getElementById("prices").innerHTML = html;
-
-}catch(error){
-
-document.getElementById("prices").innerHTML =
-"Failed to load prices";
-
-console.error(error);
-
+document.getElementById("prices").innerHTML=tickers.map(t=>`
+<div class="card">
+<div class="exchange">
+<img src="${logos[t.market.name]||'https://cdn-icons-png.flaticon.com/512/6001/6001527.png'}">
+<div><b>${t.market.name}</b><br>$${Number(t.last).toFixed(6)}</div>
+</div>
+</div><br>`).join("");
+}catch(e){
+document.getElementById("prices").innerHTML="Failed to load data";
 }
-
 }
-
 loadPrices();
 setInterval(loadPrices,30000);
-
 </script>
-
 </body>
 </html>
